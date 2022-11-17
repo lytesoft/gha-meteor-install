@@ -5,9 +5,6 @@ inputs:
     description: 'Meteor version for the `meteor` executable. If set to `local` or not explicitly set, the `meteor` executable will have the version specified in .meteor/release (this may not work with alpha and beta builds). You can use `latest` as an alias for the latest Meteor release.'
     required: true
     default: 'local'
-  decrypt_key:
-    description: 'Key to decrypt repository files with transcrypt'
-    required: false
   cache-dependency-path:
     description: 'Files to use as a cache key for global ~~/.npm dependencies'
     required: true
@@ -15,29 +12,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Cache ~/.transcryptbin for v2.3.0-pre
-      if: inputs.decrypt_key != null
-      uses: actions/cache@v3
-      id: cache-transcrypt
-      env:
-        cache-name: cache-transcrypt
-      with:
-        path: ~/.transcryptbin
-        key: ${{ runner.os }}-${{ env.cache-transcrypt }}-v2.3.0-pre
-
-    - name: Install Transcrypt
-      if: inputs.decrypt_key != null && steps.cache-transcrypt.outputs.cache-hit != 'true'
-      run: |
-        mkdir ~/.transcryptbin
-        curl -o  ~/.transcryptbin/transcrypt https://raw.githubusercontent.com/elasticdog/transcrypt/master/transcrypt
-        chmod +x ~/.transcryptbin/transcrypt
-      shell: bash
-
-    - name: Decrypt Repo (previously checked out)
-      if: inputs.decrypt_key != null
-      run: ~/.transcryptbin/transcrypt -c aes-256-cbc -y -p ${{ inputs.decrypt_key }}
-      shell: bash
-
     - name: Set $PATH
       run: echo "$HOME/.meteor" >> $GITHUB_PATH
       shell: bash
@@ -78,7 +52,7 @@ runs:
       run: echo "NODE_VERSION=$(meteor node -v)" >> $GITHUB_ENV
       shell: bash
 
-    - name: Install node
+    - name: Install Node
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
