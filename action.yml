@@ -8,15 +8,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set $PATH 🪜
+    - name: Set $PATH 
       run: echo "$HOME/.meteor" >> $GITHUB_PATH
       shell: bash
 
-    - name: Set env.METEOR_LOCAL_RELEASE 📻
+    - name: Set env.METEOR_LOCAL_RELEASE 
       run: echo "METEOR_LOCAL_RELEASE=$(cat .meteor/release | cut -d@ -f2)" >> $GITHUB_ENV
       shell: bash
 
-    - name: Set env.METEOR_EXECUTABLE_VERSION 📺
+    - name: Set env.METEOR_EXECUTABLE_VERSION 
       run: |
         if [ ${{ inputs.executable_version }} = 'local' ]; then
           echo "METEOR_EXECUTABLE_VERSION=${{ env.METEOR_LOCAL_RELEASE }}" >> $GITHUB_ENV
@@ -27,8 +27,8 @@ runs:
         fi
       shell: bash
 
-    - name: Cache ~/.meteor (Meteor ${{ env.METEOR_EXECUTABLE_VERSION }} (.meteor/release is ${{ env.METEOR_LOCAL_RELEASE }})) 💿
-      uses: actions/cache@v2
+    - name: Cache ~/.meteor (Meteor ${{ env.METEOR_EXECUTABLE_VERSION }} (.meteor/release is ${{ env.METEOR_LOCAL_RELEASE }})) 
+      uses: actions/cache@v3
       id: cache-meteor
       env:
         cache-name: cache-meteor
@@ -44,27 +44,3 @@ runs:
       run: curl https://install.meteor.com?release=${{ env.METEOR_EXECUTABLE_VERSION }} | sh
       shell: bash
 
-    - name: Cache ~/.npm 📀
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-npm
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ env.cache-name }}-
-          ${{ runner.os }}-
-
-    - name: Cache ./node_modules 💽
-      uses: actions/cache@v2
-      id: cache-node-modules
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: ./node_modules
-        key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-
-    - name: Install dependencies 📦
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: meteor npm clean-install
-      shell: bash
