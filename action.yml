@@ -67,13 +67,16 @@ runs:
         mkdir ~/.transcryptbin
         curl -o  ~/.transcryptbin/transcrypt https://raw.githubusercontent.com/elasticdog/transcrypt/master/transcrypt
         chmod +x ~/.transcryptbin/transcrypt
+      shell: bash
 
     - name: Decrypt Repo (previously checked out)
       if: inputs.decrypt_key != null
       run: ~/.transcryptbin/transcrypt -c aes-256-cbc -y -p ${{ inputs.decrypt_key }}
+      shell: bash
 
     - name: Get meteor node version
       run: echo "NODE_VERSION=$(meteor node -v)" >> $GITHUB_ENV
+      shell: bash
 
     - name: Install node
       uses: actions/setup-node@v3
