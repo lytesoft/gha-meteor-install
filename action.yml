@@ -1,5 +1,5 @@
 name: Install
-description: Installs Transcrypt, Meteor and Node
+description: Installs Meteor and Node With Cache enabled
 inputs:
   executable_version:
     description: 'Meteor version for the `meteor` executable. If set to `local` or not explicitly set, the `meteor` executable will have the version specified in .meteor/release (this may not work with alpha and beta builds). You can use `latest` as an alias for the latest Meteor release.'
