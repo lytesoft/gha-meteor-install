@@ -5,6 +5,13 @@ inputs:
     description: 'Meteor version for the `meteor` executable. If set to `local` or not explicitly set, the `meteor` executable will have the version specified in .meteor/release (this may not work with alpha and beta builds). You can use `latest` as an alias for the latest Meteor release.'
     required: true
     default: 'local'
+  decrypt_key:
+    description: 'Key to decrypt repository files with transcrypt'
+    required: false
+  cache-dependency-path:
+    description: 'Files to use as a cache key for global ~~/.npm dependencies'
+    required: true
+    default: './package-lock.json'
 runs:
   using: composite
   steps:
@@ -43,4 +50,34 @@ runs:
       if: steps.cache-meteor.outputs.cache-hit != 'true'
       run: curl https://install.meteor.com?release=${{ env.METEOR_EXECUTABLE_VERSION }} | sh
       shell: bash
+    
+    - name: Cache ~/.transcrypt v2.3.0-pre
+      if: inputs.decrypt_key != null
+      uses: actions/cache@v3
+      id: cache-transcrypt
+      env:
+        cache-name: cache-transcrypt
+      with:
+        path: ~/.transcrypt
+        key: ${{ runner.os }}-${{ env.cache-transcrypt }}-v2.3.0-pre
 
+    - name: Install Transcrypt
+      if: inputs.decrypt_key != null && steps.cache-transcrypt.outputs.cache-hit != 'true'
+      run: |
+        mkdir ~/.transcrypt
+        curl -o  ~/.transcrypt/transcrypt https://raw.githubusercontent.com/elasticdog/transcrypt/master/transcrypt
+        chmod +x ~/.transcrypt/transcrypt
+
+    - name: Decrypt Repo (previously checked out)
+      if: inputs.decrypt_key != null
+      run: ~/.transcryptbin/transcrypt -c aes-256-cbc -y -p ${{ inputs.decrypt_key }}
+
+    - name: Get meteor node version
+      run: echo "NODE_VERSION=$(meteor node -v)" >> $GITHUB_ENV
+
+    - name: Install node
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.cache-dependency-path}}
