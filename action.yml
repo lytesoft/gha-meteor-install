@@ -26,6 +26,10 @@ runs:
     - name: Set env.METEOR_RELEASE_PATH 🥾
       shell: bash
       run: echo "METEOR_RELEASE_PATH=${{ inputs.working-directory }}/.meteor/release" >> $GITHUB_ENV
+    
+    - name: Set env.METEOR_LOCAL_PATH 
+      shell: bash
+      run: echo "METEOR_LOCAL_PATH=${{ inputs.working-directory }}/.meteor/local" >> $GITHUB_ENV
 
     - name: Set env.METEOR_LOCAL_RELEASE 📻
       run: echo "METEOR_LOCAL_RELEASE=$(cat ${{ env.METEOR_RELEASE_PATH }} | cut -d@ -f2)" >> $GITHUB_ENV
@@ -61,16 +65,16 @@ runs:
       run: |
         curl https://install.meteor.com?release=${{ env.METEOR_EXECUTABLE_VERSION }} | sh
 
-    - name: Cache .meteor/local
+    - name: Cache ${{ env.METEOR_LOCAL_PATH }}
       uses: actions/cache@v4
       env:
         cache-name: cache-meteor-local
       with:
         path: |
-          ./.meteor/local/resolver-result-cache.json
-          ./.meteor/local/plugin-cache
-          ./.meteor/local/isopacks
-          ./.meteor/local/bundler-cache/scanner
+          ${{ env.METEOR_LOCAL_PATH }}/resolver-result-cache.json
+          ${{ env.METEOR_LOCAL_PATH }}/plugin-cache
+          ${{ env.METEOR_LOCAL_PATH }}/isopacks
+          ${{ env.METEOR_LOCAL_PATH }}/bundler-cache/scanner
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ inputs.local-cache-key }}-${{ env.METEOR_EXECUTABLE_VERSION }}-${{ hashFiles(env.METEOR_RELEASE_PATH) }}-${{ hashFiles('.meteor/versions') }}-${{ github.ref }}-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-${{ env.cache-name }}-${{ inputs.local-cache-key }}-${{ env.METEOR_EXECUTABLE_VERSION }}-${{ hashFiles(env.METEOR_RELEASE_PATH) }}-${{ hashFiles('.meteor/versions') }}-${{ github.ref }}-
