@@ -83,7 +83,7 @@ runs:
           ${{ runner.os }}-${{ env.cache-name }}-${{ inputs.local-cache-key }}-${{ env.METEOR_EXECUTABLE_VERSION }}-
 
     - name: Get meteor node version
-      run: echo "NODE_VERSION=$(meteor node -v)" >> $GITHUB_ENV
+      run:  echo "NODE_VERSION=$(meteor node -v | sed 's/v//' | cut -d'.' -f1,2)" >> $GITHUB_ENV
       shell: bash
 
     - name: Install Node
